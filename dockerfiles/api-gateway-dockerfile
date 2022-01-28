@@ -1,0 +1,18 @@
+FROM alpine/git AS source
+WORKDIR /usr/src/myapp
+ADD id_ed25519 /root/.ssh/id_ed25519
+RUN chmod 600 /root/.ssh/id_ed25519 \
+    && touch /root/.ssh/known_hosts \
+    && ssh-keyscan github.com >> /root/.ssh/known_hosts \
+    && git clone -b main git@github.com:oing0125/api-server-demo.git
+
+FROM gradle AS builder
+COPY --from=source /usr/src/myapp/api-server-demo /usr/src/myapp
+WORKDIR /usr/src/myapp
+RUN gradle build
+
+FROM openjdk:17.0.2-jdk
+COPY --from=builder /usr/src/myapp/build/libs/api-gateway-0.1.jar ./
+EXPOSE 8088
+
+CMD ["java", "-jar","api-gateway-0.1.jar"]

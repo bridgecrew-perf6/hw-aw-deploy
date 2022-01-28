@@ -1,0 +1,37 @@
+version: "3.7"
+
+services:
+  eureka:
+    image: eureka-sample:220127
+    ports:
+      - "8761:8761"
+    networks:
+      - aw-sample
+    healthcheck:
+      test: curl -f http://localhost:8761
+  api:
+    image: api-sample:220127
+    ports:
+      - "8080:8080"
+    environment:
+      SERVICE_NAME: service1
+      EUREKA_ENDPOINT: eureka:8761/eureka
+    depends_on:
+      - eureka
+    networks:
+      - aw-sample
+  api-gateway:
+    image: api-gateway:220128
+    ports:
+      - "8088:8088"
+    environment:
+      EUREKA_ENDPOINT: eureka:8761/eureka
+    depends_on:
+      - eureka
+      - api
+    networks:
+      - aw-sample
+
+networks:
+  aw-sample:
+    driver: bridge
