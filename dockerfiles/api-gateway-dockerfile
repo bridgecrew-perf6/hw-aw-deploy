@@ -1,10 +1,12 @@
 FROM alpine/git AS source
 WORKDIR /usr/src/myapp
-ADD id_ed25519 /root/.ssh/id_ed25519
-RUN chmod 600 /root/.ssh/id_ed25519 \
-    && touch /root/.ssh/known_hosts \
-    && ssh-keyscan github.com >> /root/.ssh/known_hosts \
-    && git clone -b main git@github.com:oing0125/api-server-demo.git
+#ADD id_ed25519 /root/.ssh/id_ed25519
+#RUN chmod 600 /root/.ssh/id_ed25519 \
+#    && touch /root/.ssh/known_hosts \
+#    && ssh-keyscan github.com >> /root/.ssh/known_hosts \
+#    && git clone -b dev-gateway-swagger git@github.com:oing0125/api-server-demo.git
+
+RUN git clone -b dev-gateway-swagger https://github.com/oing0125/api-server-demo.git
 
 FROM gradle AS builder
 COPY --from=source /usr/src/myapp/api-server-demo /usr/src/myapp

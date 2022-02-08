@@ -2,43 +2,54 @@ version: "3.7"
 
 services:
   eureka:
-    image: eureka-sample:220127
+    image: eureka-sample:220208
     ports:
-      - "8761:8761"
+      - "8762:8761"
     networks:
       - aw-sample
     healthcheck:
       test: curl -f http://localhost:8761
-  api1:
-    image: api-sample:220127
-    environment:
-      SERVICE_NAME: service1
-      EUREKA_ENDPOINT: eureka:8761/eureka
-    depends_on:
-      - eureka
-    networks:
-      - aw-sample
-  api2:
-    image: api-sample:220127
+  zipkin:
+    image: openzipkin/zipkin
     ports:
-      - "8081:8080"
-    environment:
-      SERVICE_NAME: service1
-      EUREKA_ENDPOINT: eureka:8761/eureka
-    depends_on:
-      - eureka
+      - "9412:9411"
     networks:
       - aw-sample
   api-gateway:
-    image: api-gateway:220128
+    image: api-gateway:220208
     ports:
       - "8088:8088"
     environment:
-      EUREKA_ENDPOINT: eureka:8761/eureka
+      EUREKA_ENDPOINT: http://eureka:8761/eureka
+      ZIPKIN_ENDPOINT: http://zipkin:9411
     depends_on:
       - eureka
+      - zipkin
     networks:
       - aw-sample
+  api1:
+    image: api-sample:220208
+    environment:
+      SERVICE_NAME: service1
+      EUREKA_ENDPOINT: http://eureka:8761/eureka
+      ZIPKIN_ENDPOINT: http://zipkin:9411
+    depends_on:
+      - eureka
+      - zipkin
+    networks:
+      - aw-sample
+  api2:
+    image: api-sample:220208
+    environment:
+      SERVICE_NAME: service2
+      EUREKA_ENDPOINT: http://eureka:8761/eureka
+      ZIPKIN_ENDPOINT: http://zipkin:9411
+    depends_on:
+      - eureka
+      - zipkin
+    networks:
+      - aw-sample
+
 
 networks:
   aw-sample:
