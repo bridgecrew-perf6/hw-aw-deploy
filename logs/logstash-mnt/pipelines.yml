@@ -1,0 +1,4 @@
+- pipeline.id: kafka
+  path.config: "/usr/share/logstash/pipeline/kafka.yml"
+- pipeline.id: stdin
+  path.config: "/usr/share/logstash/pipeline/stdin.yml"

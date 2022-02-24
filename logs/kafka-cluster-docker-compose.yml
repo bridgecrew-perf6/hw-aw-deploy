@@ -2,13 +2,13 @@ version: "3.7"
 
 services:
   zookeeper:
-    image: bitnami/zookeeper:latest
+    image: bitnami/zookeeper:3.5.9
     ports:
       - "2181:2181"
     networks:
       - kafka-cluster-net
     environment:
-      ALLOW_ANONYMOUS_LOGIN: yes
+      - ALLOW_ANONYMOUS_LOGIN=yes
   kafka1:
     image: bitnami/kafka:latest
     ports:
@@ -20,7 +20,7 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
       - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka1:9092,EXTERNAL://192.168.64.2:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka1:9092,EXTERNAL://localhost:9093
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
     depends_on:
@@ -36,11 +36,11 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
       - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9094
-      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka2:9092,EXTERNAL://192.168.64.2:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka2:9092,EXTERNAL://localhost:9094
       - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
     depends_on:
-      - zookeeper'
+      - zookeeper
   kafka3:
     image: bitnami/kafka:latest
     ports:
@@ -52,7 +52,7 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
       - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9095
-      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka3:9092,EXTERNAL://192.168.64.2:9095
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka3:9092,EXTERNAL://localhost:9095
       - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
     depends_on:
@@ -69,7 +69,8 @@ services:
     networks:
       - kafka-cluster-net
   filebeat:
-    image: oing0125/filebeat-oss:7.17.0
+    image: oing0125/filebeat-oss:7.17.0-elastic
+    command: sh -c "filebeat -e"
     networks:
       - kafka-cluster-net
     volumes:
@@ -89,4 +90,3 @@ networks:
 
 volumes:
   app_log_vol:
-  filebeat_yml_vol:
