@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-ui-deployment
+spec:
+  selector:
+    matchLabels:
+      app: kafka-ui
+  template:
+    metadata:
+      labels:
+        app: kafka-ui
+    spec:
+      containers:
+        - name: kafka-ui
+          image: provectuslabs/kafka-ui:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KAFKA_CLUSTERS_0_NAME
+              value: "MSK_DEMO_CLUSTER"
+            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+              value: "b-3.demo-cluster.so7j04.c6.kafka.us-east-2.amazonaws.com:9092,b-2.demo-cluster.so7j04.c6.kafka.us-east-2.amazonaws.com:9092,b-1.demo-cluster.so7j04.c6.kafka.us-east-2.amazonaws.com:9092"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-ui-service-cluster-ip
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+spec:
+  type: LoadBalancer
+  selector:
+    app: kafka-ui
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

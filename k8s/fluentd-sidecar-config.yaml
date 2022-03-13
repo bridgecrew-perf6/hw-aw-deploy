@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+data:
+  fluent.conf: |
+    @include containers.conf
+    <match fluent.**>
+      @type null
+    </match>
+  container.conf: |
+    <source>
+      @type tail
+      @id in_tail_container_logs
+      @label @containers
+      path /var/log/containers/*.log
+      exclude_path ["/var/log/containers/cloudwatch-agent*", "/var/log/containers/fluentd*"]
+      pos_file /var/log/fluentd-containers.log.pos
+      tag *
+      read_from_head true
+      <parse>
+        @type json
+        time_format %Y-%m-%dT%H:%M:%S.%NZ
+      </parse>
+    </source>
+    
+    <label @containers>
+      <filter **>
+        @type kubernetes_metadata
+        @id filter_kube_metadata
+        watch false
+      </filter>
+  
+      <filter **>
+        @type record_transformer
+        @id filter_containers_stream_transformer
+        <record>
+          stream_name ${tag_parts[3]}
+        </record>
+      </filter>
+  
+      <filter **>
+        @type concat
+        key log
+        multiline_start_regexp /^\S/
+        separator ""
+        flush_interval 5
+        timeout_label @NORMAL
+      </filter>
+  
+      <match **>
+        @type relabel
+        @label @NORMAL
+      </match>
+    </label>
+    
+    <label @NORMAL>
+      <match **>
+        @type kafka2
+        brokers b-3.demo-cluster.so7j04.c6.kafka.us-east-2.amazonaws.com:9092
+        use_event_time true
+        topic_key fluentd-container-logging
+        default_topic fluentd-container-logging
+    
+        <buffer>
+          flush_interval 5
+          chunk_limit_size 2m
+          queued_chunks_limit_size 32
+          retry_forever true
+        </buffer>
+    
+        <format>
+            @type out_file
+        </format>
+      </match>
+    </label>
+    <match accesslog>

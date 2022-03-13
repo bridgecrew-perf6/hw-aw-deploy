@@ -1,0 +1,21 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: aws-observability
+  labels:
+    aws-observability: enabled
+
+
+
+
+
+        [OUTPUT]
+          Name  es
+          Match test-*
+          Host  vpc-wallet-opensearch-demo-vfxwl7xv7zwunbwzzxtilmtnqi.us-east-2.es.amazonaws.com
+          Port  443
+          Type _doc
+          Index fargate-log
+          AWS_Auth On
+          AWS_Region us-east-2
+          tls   On

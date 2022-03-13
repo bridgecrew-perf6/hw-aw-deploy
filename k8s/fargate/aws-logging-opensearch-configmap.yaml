@@ -1,0 +1,48 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: aws-logging
+  namespace: aws-observability
+data:
+  flb_log_cw: "true" #ships fluent-bit process logs to CloudWatch
+
+  output.conf: |
+    [OUTPUT]
+      Name  es
+      Match *
+      Host  vpc-wallet-opensearch-demo-vfxwl7xv7zwunbwzzxtilmtnqi.us-east-2.es.amazonaws.com
+      Port  443
+      Type doc
+      Index test-log
+      AWS_Auth On
+      AWS_Region us-east-2
+      tls   On
+    
+    [OUTPUT]
+      Name  es
+      Match *nginx-deployment*
+      Host  vpc-wallet-opensearch-demo-vfxwl7xv7zwunbwzzxtilmtnqi.us-east-2.es.amazonaws.com
+      Port  443
+      Type doc
+      Index nginx-log
+      AWS_Auth On
+      AWS_Region us-east-2
+      tls   On
+    
+    [OUTPUT]
+      Name  es
+      Match *sample-app-deployment*
+      Host  vpc-wallet-opensearch-demo-vfxwl7xv7zwunbwzzxtilmtnqi.us-east-2.es.amazonaws.com
+      Port  443
+      Type doc
+      Index sample-app-log
+      AWS_Auth On
+      AWS_Region us-east-2
+      tls   On
+
+  filters.conf: |
+    [FILTER]
+      Name             kubernetes
+      Match            kube.*
+      Buffer_Size         0
+      Kube_Meta_Cache_TTL 300s

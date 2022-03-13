@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+  namespace: node-group
+  labels:
+    k8s-app: fluentd-logging
+    version: v1
+    kubernetes.io/cluster-service: "true"
+spec:
+  selector:
+    matchLabels:
+      name: fluentd-logging
+  template:
+    metadata:
+      labels:
+        name: fluentd-logging
+        k8s-app: fluentd-logging
+        version: v1
+        kubernetes.io/cluster-service: "true"
+    spec:
+      serviceAccount: fluentd
+      serviceAccountName: fluentd
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: wallet-ec2-node-group
+      containers:
+        - name: fluentd
+          image: oing0125/fluentd-kafka-output:220303
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: config-volume
+              mountPath: /fluentd/etc/
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: config-volume
+          configMap:
+            name: fluentd-config
