@@ -9,21 +9,10 @@ data:
   output.conf: |
     [OUTPUT]
       Name  es
-      Match *
-      Host  vpc-wallet-opensearch-demo-vfxwl7xv7zwunbwzzxtilmtnqi.us-east-2.es.amazonaws.com
-      Port  443
-      Type doc
-      Index test-log
-      AWS_Auth On
-      AWS_Region us-east-2
-      tls   On
-    
-    [OUTPUT]
-      Name  es
       Match *nginx-deployment*
       Host  vpc-wallet-opensearch-demo-vfxwl7xv7zwunbwzzxtilmtnqi.us-east-2.es.amazonaws.com
       Port  443
-      Type doc
+      Type _doc
       Index nginx-log
       AWS_Auth On
       AWS_Region us-east-2
@@ -31,11 +20,11 @@ data:
     
     [OUTPUT]
       Name  es
-      Match *sample-app-deployment*
+      Match *external-deployment*
       Host  vpc-wallet-opensearch-demo-vfxwl7xv7zwunbwzzxtilmtnqi.us-east-2.es.amazonaws.com
       Port  443
-      Type doc
-      Index sample-app-log
+      Type _doc
+      Index external-log
       AWS_Auth On
       AWS_Region us-east-2
       tls   On

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-deployment
+spec:
+  selector:
+    matchLabels:
+      app: external
+  template:
+    metadata:
+      labels:
+        app: external
+    spec:
+      containers:
+        - name: external
+          image: 671338035606.dkr.ecr.us-east-2.amazonaws.com/external-sample:220314
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATASOURCE_MASTER_URL
+              value: "jdbc:mysql://dev-mysql8-aurora.cluster-csnennfgsbve.us-east-2.rds.amazonaws.com:3306/aw_db"
+            - name: DATASOURCE_MASTER_USERNAME
+              value: "admin"
+            - name: DATASOURCE_MASTER_PASSWORD
+              value: "admin63631!"
+            - name: DATASOURCE_SLAVE_URL
+              value: "jdbc:mysql://dev-mysql8-aurora.cluster-ro-csnennfgsbve.us-east-2.rds.amazonaws.com:3306/aw_db"
+            - name: DATASOURCE_SLAVE_USERNAME
+              value: "admin"
+            - name: DATASOURCE_SLAVE_PASSWORD
+              value: "admin63631!"
